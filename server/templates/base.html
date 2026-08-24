@@ -55,6 +55,7 @@
 
 <body>
     <div class="gets-blurred">
+    <div class="container-fluid">
 
     <!-- PADDING ROW -->
     <div class="row"><div class="col-md-12"><br></div></div>
@@ -68,7 +69,7 @@
             <!-- TITLE -->
             <a href="{{ url_for('main.index') }}" style="all: unset;">
                 <h1 class="title" style="float: left;">
-                    <img src="{{ url_for('static', filename='img/wordmark.png') }}" alt="Wiki Wall Street Wordmark" style="max-height: 1.5em; max-width: 90vw;">
+                    <img src="{{ url_for('static', filename='img/wordmark.png') }}" alt="Wiki Wall Street Wordmark" style="max-height: 1.5em; max-width: 100%;">
                 </h1>
                 <!-- <h1 class="title" style="float: left;">
                     Wiki Wall Street
@@ -114,6 +115,7 @@
         <div class="col-md-2"></div>
      </div>
     </div>
+    </div>
 
     <hr>
 
@@ -143,6 +145,7 @@
 <footer>
     <br>
     <hr>
+    <div class="container-fluid">
     <div class="row gets-blurred">
         <div class="col-md-12">
             <p class="text-center" style="font-size:medium;">
@@ -159,6 +162,7 @@
                 <a href="#" target="_blank" rel="noopener noreferrer">Contact Me</a>
             </p>
         </div>
+    </div>
     </div>
 </footer>
 

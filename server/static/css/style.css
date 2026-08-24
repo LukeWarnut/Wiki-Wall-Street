@@ -1,3 +1,9 @@
+/* Bootstrap .row uses negative side margins. Keep the page from growing wider than the viewport. */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 .loading-image {
   width: 5em;
   height: 5em;
