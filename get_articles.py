@@ -8,10 +8,15 @@ from multiprocessing import Pool
 
 # parse arguments
 parser = argparse.ArgumentParser(description="Get articles from Wikipedia categories")
-parser.add_argument("-f", "--filepath", type=str)
+parser.add_argument("-f", "--filepath", type=str, required=True)
+parser.add_argument("-s", "--start-at", type=str, default=None,
+                    help="Optional: resume processing from this subcategory name (inclusive)")
 args = parser.parse_args()
 
-wiki = wikipediaapi.Wikipedia("en")
+wiki = wikipediaapi.Wikipedia(
+    user_agent="WikiWallStreet/1.0 (contact: luke.robert.warner@gmail.com)",
+    language="en",
+)
 
 def get_articles_from_subcategory(category_name):
     articles = []
@@ -29,8 +34,10 @@ if __name__ == '__main__':
     with open(args.filepath, "r") as f:
         subcategories = f.read().splitlines()
 
-    start_at = "Max Verstappen"
-    subcategories = subcategories[subcategories.index(start_at):]
+    if args.start_at is not None:
+        if args.start_at not in subcategories:
+            raise SystemExit(f"Start-at value '{args.start_at}' not found in {args.filepath}")
+        subcategories = subcategories[subcategories.index(args.start_at):]
 
     with Pool(8) as p:
         articles = p.map(get_articles_from_subcategory, subcategories)

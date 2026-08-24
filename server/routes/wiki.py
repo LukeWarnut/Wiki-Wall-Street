@@ -71,6 +71,8 @@ def article_price(article, timespan):
     else:
         start = today_wiki() - timedelta(days=30) # default to month
     normalized_views = WikiAPI.normalized_views(article, start=start, end=today_wiki())
+    if normalized_views is None:
+        return(jsonify(timestamps=[], views=[]))
     # Return in a format to graph in JavaScript
     timestamps = [x["timestamp"] for x in normalized_views]
     views = [x["views"] for x in normalized_views]
@@ -80,6 +82,8 @@ def article_price(article, timespan):
 @cache.cached(timeout=86400) # Should only change once a day (will be cleared when the stuff updates)
 def article_description(article):
     info = WikiAPI.article_information(article)
+    if info is None:
+        return(jsonify(title=article, pageid=None, short_desc=None, categories=[]))
     return(jsonify(title=info["title"], pageid=info["pageid"], short_desc=info["short_desc"], categories=info["categories"]))
 
 @wiki.route("/api/trending_articles")

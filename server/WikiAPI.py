@@ -311,16 +311,20 @@ def normalized_views(article,
         
         # SOMETIMES THE PAGEVIEWS LIST IS SHORTER THAN THE PROJECTVIEWS LIST OR SOMETHING
         # We're prioritizing returning as much of the pageviews list as possible
-        project_timestamps = [x["timestamp"] for x in projectviews_list]
-        for i in range(len(pageviews_list)):
-           timestamp = pageviews_list[i]["timestamp"]
-           if timestamp not in project_timestamps:
-               pageviews_list.pop(i) # remove the pageviews entry if it doesn't have a corresponding timestamp in the projectviews list
-           else:
-                norm_factor = average_project_views / projectviews_list[i]["views"]
-                pageviews_list[i]["views"] *= norm_factor
+        project_views_by_timestamp = {x["timestamp"]: x["views"] for x in projectviews_list}
+        normalized = []
+        for item in pageviews_list:
+            timestamp = item["timestamp"]
+            if timestamp not in project_views_by_timestamp:
+                continue # remove the pageviews entry if it doesn't have a corresponding timestamp in the projectviews list
+            project_views = project_views_by_timestamp[timestamp]
+            if project_views == 0:
+                continue # avoid divide-by-zero; skip days with no project views
+            norm_factor = average_project_views / project_views
+            item["views"] *= norm_factor
+            normalized.append(item)
 
-        return(pageviews_list)
+        return(normalized)
     else:
         print(f"WARNING: {article} does not exist")
         return(None)
@@ -352,15 +356,22 @@ def article_information(article, project="en.wikipedia"):
 
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
+        data = response.json()
+        page = data["query"]["pages"][0]
+
+        # The article doesn't exist (MediaWiki marks it as "missing" and omits "pageid")
+        if "missing" in page or "pageid" not in page:
+            print(f"WARNING: {article} does not exist")
+            return(None)
 
         # Get the title
-        info_dict["title"] = response.json()["query"]["pages"][0]["title"]
+        info_dict["title"] = page["title"]
 
         # Get the pageid
-        info_dict["pageid"] = response.json()["query"]["pages"][0]["pageid"]
+        info_dict["pageid"] = page["pageid"]
 
         # Get the short description
-        content = response.json()["query"]["pages"][0]["revisions"][0]["slots"]["main"]["content"]
+        content = page["revisions"][0]["slots"]["main"]["content"]
         try: 
             if "Short description|" in content:
                 info_dict["short_desc"] = content.split("{{Short description|")[1].split("}}")[0]

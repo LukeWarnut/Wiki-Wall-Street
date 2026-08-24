@@ -157,12 +157,18 @@ class Game():
     def allowed_article(self, article_name):
         """Returns a boolean and a string (reason)"""
         # Sucks that I have to make this call twice per article but it's probably fine
-        article_categories = WikiAPI.article_information(article_name)["categories"]
+        info = WikiAPI.article_information(article_name)
+        if info is None:
+            return(False, "not_found") # article doesn't exist
+        article_categories = info["categories"]
 
         # Check if the article is below the minimum views limit
         # We do this first, because we want to enforce this limit no matter what
         if "views_limit" in self.settings:
-            lowest_this_month = float(min([x["views"] for x in WikiAPI.normalized_views(article_name, end=today_wiki())]))
+            normalized = WikiAPI.normalized_views(article_name, end=today_wiki())
+            if normalized is None or len(normalized) == 0:
+                return(False, "views_limit")
+            lowest_this_month = float(min([x["views"] for x in normalized]))
             if (float(self.settings["views_limit"]) > lowest_this_month):
                 return(False, "views_limit")
             
